@@ -28,7 +28,7 @@ with open("url.txt", "w") as x:
         csdn_article_link_list = page_html.xpath(
             "//div[@class='article-item-box csdn-tracking-statistics']//h4//a/@href")
         print(csdn_article_link_list)
-        # for obj in csdn_article_link_list:
-        #     x.write(obj)
-        #     x.write('\n')
+        for obj in csdn_article_link_list:
+            x.write(obj)
+            x.write('\n')
 x.close()
