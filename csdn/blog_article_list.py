@@ -15,7 +15,7 @@ header = {
 author_name = "heian_99"
 # 博主博文页数
 page_num = 9
-
+list_page=[]
 with open("url.txt", "w") as x:
     for index in range(1, page_num + 1):
         # 拼接URL
@@ -27,8 +27,10 @@ with open("url.txt", "w") as x:
         # 博客文章的链接
         csdn_article_link_list = page_html.xpath(
             "//div[@class='article-item-box csdn-tracking-statistics']//h4//a/@href")
-        print(csdn_article_link_list)
+        # print(csdn_article_link_list)
         for obj in csdn_article_link_list:
             x.write(obj)
+            list_page.append(obj)
             x.write('\n')
 x.close()
+print(list_page)
