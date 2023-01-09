@@ -5,7 +5,7 @@
 import random
 
 list_image=[]
-for i in range(1,11):
+for i in range(1,100):
     images=str(i).rjust(2,'0')
     list_image.append(images)
 
