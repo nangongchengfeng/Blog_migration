@@ -18,7 +18,7 @@ def check_image_size(url, width=1920, height=1080):
     # Check if the size matches the required size
     return all((image_width == width, image_height == height))
 # Check if an image at a given URL has size 1920x1080
-if check_image_size('https://img-blog.csdnimg.cn/fd4ce46ee29941649c50596d99153ca2.png'):
+if check_image_size('https://pic.netbian.com/uploads/allimg/221019/001522-166610972208a0.jpg'):
     print('Image has the required size')
 else:
     print('Image does not have the required size')
