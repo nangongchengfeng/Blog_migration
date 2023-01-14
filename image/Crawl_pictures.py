@@ -20,6 +20,11 @@ headers = {
 
 # https://pic.netbian.com/e/search/result/index.php?page={page}&searchid=1164
 def get_url_info(page):
+    """
+    根据地址请求，返回页面的text
+    :param page:
+    :return:
+    """
     url = f'http://www.netbian.com/e/search/result/index.php?page={page}&searchid=4279'
     res = requests.get(url, headers=headers).text
     return res
@@ -27,6 +32,11 @@ def get_url_info(page):
 
 # 获取第一层 图片地址
 def get_url_list(res):
+    """
+    根据 界面的text 值，过滤特定的标签图片，组合界面地址
+    :param res:
+    :return:
+    """
     soup = BeautifulSoup(res, "html.parser")
     res.encode('UTF-8').decode('UTF-8')
     # clearfix
@@ -40,24 +50,30 @@ def get_url_list(res):
 
 # 爬取 图片真实地址
 def get_image_url(image_url):
+    """
+    根据组合的界面地址，获取真是的图片地址
+    :param image_url:
+    :return:
+    """
     all_images_url = []
     for new_url in image_url:
         res = requests.get(new_url, headers=headers).text
         soup = BeautifulSoup(res, "html.parser")
         res.encode('UTF-8').decode('UTF-8')
 
-
         div_class = soup.find(name='div', attrs={"class": "pic"})
         a_name = div_class.find_all(name='img')
 
-
         for i in a_name:
-
-            all_images_url.append( i['src'])
+            all_images_url.append(i['src'])
     return all_images_url
 
 
 def create_directory():
+    """
+    查询目录是否存在，不存在就引用
+    :return:
+    """
     # 创建文件夹
     isExists = os.path.exists('./4kdongman')
     if not isExists:
@@ -65,6 +81,11 @@ def create_directory():
 
 
 def start_main(numbers):
+    """
+    开始根据页数进行 爬出页面地址
+    :param numbers:
+    :return:
+    """
     all_list_urls = []
     for i in range(0, numbers):
         # print(i)
@@ -79,6 +100,11 @@ def start_main(numbers):
 
 
 def url_download(all_list_urls):
+    """
+    根据列表 的url 下载图片
+    :param all_list_urls:
+    :return:
+    """
     create_directory()
     count = 1
     for i in all_list_urls:
@@ -92,9 +118,8 @@ def url_download(all_list_urls):
 
 
 if __name__ == '__main__':
+    """
+    主函数，定义启动
+    """
     all_list_urls = start_main(10)
     url_download(all_list_urls)
-    # res=get_url_info(1)
-    # print(res)
-    # image_url=get_url_list(res)
-    # print(image_url)
