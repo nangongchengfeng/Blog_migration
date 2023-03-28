@@ -15,21 +15,24 @@ from qiniu import Auth, put_file
 # 获取Access Key 和 Secret Key 后，进行初始化对接：
 q = Auth(access_key='xxx',
          secret_key='xxx')
-
 # 上传的七牛云空间
 bucket_name = 'heian99'
 
-# 上传后保存的文件名
-key = '1.jpg'
 
-# 生成上传token
-token = q.upload_token(bucket_name, key)
+def upload_to_qiniu(file):
+    # 上传后保存的文件名
+    key = f'csdn/{file}'
 
-# 要上传文件的路径
-localfile = 'E:\Code\GitHUB_CODE\Blog_migration\mm.png'
+    # 生成上传token
+    token = q.upload_token(bucket_name, key)
 
-ret, info = put_file(token, key, localfile)
+    # 要上传文件的路径
+    localfile = f'image/{file}'
+    ret, info = put_file(token, key, localfile)
+    # 拼接路径   qj5s0uqce.hb-bkt.clouddn.com这个是创建空间分配的测试域名
+    image_file = 'http://image.ownit.top/' + ret.get('key')
+    print(image_file)  # http://qj5s0uqce.hb-bkt.clouddn.com/1.jpg
+    return image_file
 
-# 拼接路径   qj5s0uqce.hb-bkt.clouddn.com这个是创建空间分配的测试域名
-image_file = 'http://image.ownit.top/' + ret.get('key')
-print(image_file)  # http://qj5s0uqce.hb-bkt.clouddn.com/1.jpg
+if __name__ == '__main__':
+    upload_to_qiniu("10.jpg")
