@@ -11,10 +11,11 @@
 # @File    : update_file.py
 # @Software: PyCharm
 from qiniu import Auth, put_file
+from apollo_config import secretKey, accessKey
 
 # 获取Access Key 和 Secret Key 后，进行初始化对接：
-q = Auth(access_key='xxxxxx',
-         secret_key='xxxx')
+q = Auth(access_key=accessKey,
+         secret_key=secretKey)
 # 上传的七牛云空间
 bucket_name = 'heian99'
 
