@@ -10,6 +10,11 @@
 # @Email   : 1794748404@qq.com
 # @File    : update_file.py
 # @Software: PyCharm
+import os
+import random
+import string
+
+import requests
 from qiniu import Auth, put_file
 from apollo_config import secretKey, accessKey
 
@@ -19,6 +24,17 @@ q = Auth(access_key=accessKey,
 # 上传的七牛云空间
 bucket_name = 'heian99'
 
+
+
+
+def generate_random_string(length):
+    # 生成指定长度的随机字符串，包含数字和小写字母
+    letters_and_digits = string.ascii_lowercase + string.digits
+    return ''.join(random.choice(letters_and_digits) for _ in range(length))
+
+def generate_random_filename(extension='.png'):
+    # 生成以指定扩展名结尾的随机文件名
+    return generate_random_string(32) + extension
 
 def upload_to_qiniu(file):
     # 上传后保存的文件名
@@ -35,6 +51,23 @@ def upload_to_qiniu(file):
     print(image_file)  # http://qj5s0uqce.hb-bkt.clouddn.com/1.jpg
     return image_file
 
+def download_image(url, save_dir = './image/'):
+    # 从给定的URL下载图片，并保存到指定目录下
+    response = requests.get(url)
+    if response.status_code == 200:
+        filename = generate_random_filename('.png')
+        filepath = os.path.join(save_dir, filename)
+        with open(filepath, 'wb') as f:
+            f.write(response.content)
+        upload_to_qiniu(filename)
+        print(f'Saved image {filename} to {save_dir}.')
+    else:
+        print(f'Failed to download image from {url}, status code: {response.status_code}.')
+
+# 使用示例
+
 
 if __name__ == '__main__':
-    upload_to_qiniu("10.jpg")
+    url = 'https://img-blog.csdnimg.cn/20200429162352895.bmp?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2hlaWFuXzk5,size_16,color_FFFFFF,t_70'
+    download_image(url)
+    # upload_to_qiniu("10.jpg")

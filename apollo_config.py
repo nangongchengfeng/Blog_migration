@@ -20,5 +20,5 @@ accessKey = client.get_value('accessKey')
 secretKey = client.get_value('secretKey')
 # print(MAIL_USERNAME,MAIL_PASSWORD)
 # MySQL 账号和密码
-
-print(accessKey)
+print("---------------------------")
+# print(accessKey)

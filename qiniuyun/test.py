@@ -8,12 +8,19 @@ import frontmatter
 
 metadata_str = """
 ---
----
-title: 集群服务器的网络连接状态接入ELK（可视化操作）
-date: 2021-11-22 15:36:12
-tags:  Linux实战操作 zookeeper java Kubernetes
-categories: 项目实战
----
+author: 南宫乘风
+categories:
+- Kubernetes
+date: 2021-09-15 10:56:40
+description: 错误今天不知道怎么回事，一台机器的报错，也就是无法初始化正常解决办法移除这台主机多余的网卡和然后从重新删除这个错误的，就会恢复正常。。。。。。。
+image: http://image.ownit.top/4kdongman/46.jpg
+tags:
+- 错误问题解决
+- golang
+- docker
+- python
+title: calico-node 报错calico/node is not ready BIRD is not ready BGP not established
+  with
 ---
 """
 metadata = frontmatter.loads(metadata_str)
