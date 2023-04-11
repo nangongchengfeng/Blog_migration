@@ -13,7 +13,7 @@ from datetime import datetime, timedelta
 import chardet
 import parsel
 import requests
-import tomd
+import tomd2
 
 # 正则中的%s分割
 splits = [

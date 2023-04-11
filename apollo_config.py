@@ -15,9 +15,10 @@ client = ApolloClient(app_id="qiniuyun", cluster="default",
                       config_server_url='http://' + APOLLO_CONFIG_URL)
 # os.environ.get('APOLLO_CONFIG_URL')
 
-# 获取邮箱地址的 账号和密码
+
 accessKey = client.get_value('accessKey')
 secretKey = client.get_value('secretKey')
+cookie = client.get_value('cookie')
 # print(MAIL_USERNAME,MAIL_PASSWORD)
 # MySQL 账号和密码
 print("---------------------------")
