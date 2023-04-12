@@ -131,10 +131,10 @@ def get_blog_time(url):
 
 
 # 通过文章id获取文章内容，并将其保存为.md文件
-def request_md(id):
+def request_md(blogs):
     # 获取指定id的博客列表
     # blogs = request_blog_list(id)
-    blogs = [130058875, 130099639]  # , 130099639  130058875
+    # , 130099639  130058875
 
     # 遍历博客列表中所有文章
     for blog_dict in blogs:
@@ -234,10 +234,9 @@ def main():
     name_dir = './' + str(csdn_id)
     if not os.path.exists(name_dir):
         os.mkdir(name_dir)
-
-    request_md(csdn_id)
+    blogs = [130058875, 130099639]
+    request_md(blogs)
 
 
 if __name__ == '__main__':
-    # main()
-    request_md('heian_99')
+    main()
