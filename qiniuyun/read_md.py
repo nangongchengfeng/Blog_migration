@@ -29,7 +29,7 @@ def get_url(url):
             filename = re.findall(filename_pattern, url)[-1]
         else:
             filename = url.split('/')[-1]
-        filepath = f'image/{filename}'
+        filepath = f'images/{filename}'
         print(filename)
         with open(filepath, 'wb') as f:
             f.write(content)
@@ -39,21 +39,10 @@ def get_url(url):
 
 
 def random_get_url():
-    list_image = ['01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11', '12', '13', '14', '15', '16',
-                  '17',
-                  '18', '19', '20', '21', '22', '23', '24', '25', '26', '27', '28', '29', '30', '31', '32', '33',
-                  '34',
-                  '35', '36', '37', '38', '39', '40', '41', '42', '43', '44', '45', '46', '47', '48', '49', '50',
-                  '51',
-                  '52', '53', '54', '55', '56', '57', '58', '59', '60', '61', '62', '63', '64', '65', '66', '67',
-                  '68',
-                  '69', '70', '71', '72', '73', '74', '75', '76', '77', '78', '79', '80', '81', '82', '83', '84',
-                  '85',
-                  '86', '87', '88', '89', '90', '91', '92', '93', '94', '95', '96', '97', '98', '99', '100', '101',
-                  '102']
-    x = random.choice(list_image)
-    image_url = f"http://image.ownit.top/4kdongman/{x}.jpg"
-    # print(image_url)
+    # 生成数字列表，替换原始的图片编号列表，使用zfill()函数将数字转换成两位数，例如1变成'01'，方便拼接url
+    nums = [str(i+1).zfill(2) for i in range(102)]
+    x = random.choice(nums)  # 随机选择一个数字作为图片编号
+    image_url = f"http://image.ownit.top/4kdongman/{x}.jpg"  # 拼接图片url
     return image_url
 
 
