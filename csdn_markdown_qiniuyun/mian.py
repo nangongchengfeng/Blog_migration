@@ -235,7 +235,7 @@ def main():
     name_dir = './' + str(csdn_id) + '/'
     if not os.path.exists(name_dir):
         os.mkdir(name_dir)
-    blogs = [130058875, 130099639]
+    blogs = [130138325]
     request_md(blogs)
 
 
