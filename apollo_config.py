@@ -6,7 +6,6 @@
 # @Software: PyCharm
 import os
 
-
 from pyapollos import ApolloClient
 
 print("加载apollo配置")

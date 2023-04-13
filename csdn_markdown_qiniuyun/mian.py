@@ -192,7 +192,7 @@ def request_md(blogs):
         content_new = metadata_str_new
         try:
             # 提取文章正文
-            with open(filename, mode="w", encoding="utf-8") as f:
+            with open(name_dir + filename, mode="w", encoding="utf-8") as f:
                 f.write(content_new)
             print("download blog markdown blog:" + '【' + filename + '】')
             # print(metadata_str_new)
@@ -231,7 +231,8 @@ def main():
     #
     # csdn_id = args.id
     csdn_id = 'heian_99'
-    name_dir = './' + str(csdn_id)
+    global name_dir
+    name_dir = './' + str(csdn_id) + '/'
     if not os.path.exists(name_dir):
         os.mkdir(name_dir)
     blogs = [130058875, 130099639]
