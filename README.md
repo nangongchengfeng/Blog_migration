@@ -38,3 +38,10 @@ Hugo 博客
 
 ![1673489016431](images/1673489016431.png)
 
+
+```python
+
+pip install pipreqs
+
+pipreqs ./ --encoding=utf8 
+```
