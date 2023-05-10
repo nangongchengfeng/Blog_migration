@@ -69,6 +69,7 @@ def get_news_table(data):
         ], style={'height': '30px', 'fontSize': '16'}) for i in range(min(len(df), 100))
     ])], style={"height": "90%", "width": "98%"})
 
+
 @cache.memoize(timeout=3590)
 def get_catego():
     """获取当日最新的文章数据"""
@@ -79,6 +80,10 @@ def get_catego():
 # @cache.memoize(timeout=3590), 可选择设置缓存, 我没使用
 def get_df():
     """获取当日最新的文章数据"""
+    # 设置pandas参数，使其以完整显示模式打印DataFrame
+    pd.set_option('display.max_columns', None)
+    pd.set_option('display.max_rows', None)
+    pd.set_option('display.width', None)
     df = pd.read_sql(today, con=engine)
     df['date_day'] = df['date'].apply(lambda x: x.split(' ')[0]).astype('datetime64[ns]')
     df['date_month'] = df['date'].apply(lambda x: x[:7].split('-')[0] + "年" + x[:7].split('-')[-1] + "月")
@@ -86,7 +91,7 @@ def get_df():
     df['year'] = df['date_day'].dt.year
     df['month'] = df['date_day'].dt.month
     df['week'] = df['date_day'].dt.isocalendar().week
-
+    # print(df)
     return df
 
 
@@ -195,18 +200,22 @@ def get_bar(n):
     df = get_df()
     df_date_month = pd.DataFrame(df['date_month'].value_counts(sort=False))
     df_date_month.sort_index(inplace=True)
+    # print(df_date_month)
+    date_month_list = df_date_month.index.tolist()  # 将date_month列转换为列表
+    count_list = df_date_month['count'].tolist()  # 将count列转换为列表
+
+    print(date_month_list, count_list)
+    x = ['Product A', 'Product B', 'Product C']
+    y = [20, 14, 23]
     trace = go.Bar(
-        x=df_date_month.index,
-        y=df_date_month['date_month'],
-        text=df_date_month['date_month'],
+        x=date_month_list,
+        y=count_list,
+        text=count_list,
         textposition='auto',
-        marker=dict(color='#33ffe6')
+        marker=dict(color=color_scale[:len(date_month_list)])
     )
     layout = go.Layout(
-        margin=dict(l=40, r=40, t=10, b=50),
-        yaxis=dict(gridcolor='#e2e2e2'),
-        paper_bgcolor='rgba(0,0,0,0)',
-        plot_bgcolor='rgba(0,0,0,0)',
+        margin=dict(l=40, r=40, t=10, b=50)
     )
     return go.Figure(data=[trace], layout=layout)
 
@@ -215,8 +224,8 @@ def get_bar(n):
 @app.callback(Output('pie', 'figure'), [Input("river", "n_intervals")])
 def get_pie(n):
     df = get_catego()
-    df_types = pd.DataFrame(df[['categorize','column_num']])
-    print("测试pie",df_types)
+    df_types = pd.DataFrame(df[['categorize', 'column_num']])
+    # print("测试pie",df_types)
     trace = go.Pie(
         labels=df_types['categorize'],
         values=df_types['column_num'],
@@ -253,8 +262,6 @@ def get_heatmap(value, n):
         margin=dict(l=50, r=40, t=30, b=50),
     )
     return go.Figure(data=[trace], layout=layout)
-
-
 
 
 # 回调函数, 第二个柱状图(柱状图+折线图)
