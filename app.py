@@ -257,9 +257,10 @@ def get_catego():
 @app.callback(Output('mix', 'figure'), [Input("river", "n_intervals")])
 def get_mix(n):
     df = get_catego()
-    df_type_visit_sum = pd.DataFrame(df[['read_num','categorize']])
+    df_type_visit_sum = pd.DataFrame(df['read_num'].groupby(df['categorize']).sum())
+    # df_type_visit_sum = pd.DataFrame(df[['read_num','categorize']])
+    df_type_visit_sum = df_type_visit_sum.sort_values(by='read_num', ascending=False).nlargest(10, 'read_num')
     print(df_type_visit_sum)
-
 
     trace1 = go.Bar(
         x=df_type_visit_sum.index,
@@ -270,7 +271,7 @@ def get_mix(n):
     )
     trace2 = go.Scatter(
         x=df_type_visit_sum.index,
-        y=df_type_visit_sum['categorize'],
+        y=df_type_visit_sum.index,
         name='平均阅读',
         yaxis='y2',
         line=dict(color='#161D33')
