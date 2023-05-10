@@ -42,7 +42,7 @@ cache = Cache(app.server, config={
 # 读取info表的数据
 info = pd.read_sql('info', con=engine)
 
-print(info)
+# print(info)
 # 图表颜色
 color_scale = ['#2c0772', '#3d208e', '#8D7DFF', '#CDCCFF', '#C7FFFB', '#ff2c6d', '#564b43', '#161d33']
 
@@ -69,6 +69,12 @@ def get_news_table(data):
         ], style={'height': '30px', 'fontSize': '16'}) for i in range(min(len(df), 100))
     ])], style={"height": "90%", "width": "98%"})
 
+@cache.memoize(timeout=3590)
+def get_catego():
+    """获取当日最新的文章数据"""
+    df = pd.read_sql("categorize", con=engine)
+    return df
+
 
 # @cache.memoize(timeout=3590), 可选择设置缓存, 我没使用
 def get_df():
@@ -81,15 +87,16 @@ def get_df():
     df['month'] = df['date_day'].dt.month
     df['week'] = df['date_day'].dt.isocalendar().week
 
-    # print("-------------------df的值---------------------",df)
     return df
 
 
 # 导航栏的图片及标题
 head = html.Div([
-    html.Div(html.Img(src='https://www.ownit.top/img/avatar_hu227367ba8544f2fc7811ed9508937bec_102665_300x0_resize_box_3.png', height="100%"),
-             style={"float": "left", "height": "90%", "margin-top": "5px", "border-radius": "50%",
-                    "overflow": "hidden"}),
+    html.Div(html.Img(
+        src='https://www.ownit.top/img/avatar_hu227367ba8544f2fc7811ed9508937bec_102665_300x0_resize_box_3.png',
+        height="100%"),
+        style={"float": "left", "height": "90%", "margin-top": "5px", "border-radius": "50%",
+               "overflow": "hidden"}),
     html.Span("{}博客的Dashboard".format(info['author_name'][0]), className='app-title'),
 ], className="row header")
 
@@ -164,7 +171,6 @@ app.layout = html.Div([
 ])
 
 
-
 # 回调函数, 60秒刷新info数据, 即第一列的数值实时刷新
 @app.callback(Output('load_info', 'children'), [Input("stream", "n_intervals")])
 def load_info(n):
@@ -208,11 +214,12 @@ def get_bar(n):
 # 回调函数, 中间的饼图
 @app.callback(Output('pie', 'figure'), [Input("river", "n_intervals")])
 def get_pie(n):
-    df = get_df()
-    df_types = pd.DataFrame(df['type'].value_counts(sort=False))
+    df = get_catego()
+    df_types = pd.DataFrame(df[['categorize','column_num']])
+    print("测试pie",df_types)
     trace = go.Pie(
-        labels=df_types.index,
-        values=df_types['type'],
+        labels=df_types['categorize'],
+        values=df_types['column_num'],
         marker=dict(colors=color_scale[:len(df_types.index)])
     )
     layout = go.Layout(
@@ -234,7 +241,7 @@ def get_heatmap(value, n):
     cross.sort_index(inplace=True)
     trace = go.Heatmap(
         x=['第{}周'.format(i) for i in cross.columns],
-        y=["星期{}".format(i+1) if i != 6 else "星期日" for i in cross.index],
+        y=["星期{}".format(i + 1) if i != 6 else "星期日" for i in cross.index],
         z=cross.values,
         colorscale="Blues",
         reversescale=False,
@@ -247,10 +254,7 @@ def get_heatmap(value, n):
     )
     return go.Figure(data=[trace], layout=layout)
 
-def get_catego():
-    """获取当日最新的文章数据"""
-    df = pd.read_sql("categorize", con=engine)
-    return df
+
 
 
 # 回调函数, 第二个柱状图(柱状图+折线图)
@@ -259,8 +263,7 @@ def get_mix(n):
     df = get_catego()
     df_type_visit_sum = pd.DataFrame(df['read_num'].groupby(df['categorize']).sum())
     # df_type_visit_sum = pd.DataFrame(df[['read_num','categorize']])
-    df_type_visit_sum = df_type_visit_sum.sort_values(by='read_num', ascending=False).nlargest(10, 'read_num')
-    print(df_type_visit_sum)
+    df_type_visit_sum = df_type_visit_sum.sort_values(by='read_num', ascending=False).nlargest(15, 'read_num')
 
     trace1 = go.Bar(
         x=df_type_visit_sum.index,
@@ -294,18 +297,18 @@ def get_mix(n):
         paper_bgcolor='rgba(0,0,0,0)',
         plot_bgcolor='rgba(0,0,0,0)',
     )
-    return go.Figure(data=[trace1, trace2], layout=layout)
+    return go.Figure(data=[trace1], layout=layout)
 
 
 # 点击事件, 选择两个下拉选项, 点击对应区域的图表, 文章列表会刷新
 @app.callback(Output('click-data', 'children'),
-        [Input('pie', 'clickData'),
-         Input('bar', 'clickData'),
-         Input('mix', 'clickData'),
-         Input('heatmap', 'clickData'),
-         Input('dropdown1', 'value'),
-         Input('dropdown2', 'value'),
-         ])
+              [Input('pie', 'clickData'),
+               Input('bar', 'clickData'),
+               Input('mix', 'clickData'),
+               Input('heatmap', 'clickData'),
+               Input('dropdown1', 'value'),
+               Input('dropdown2', 'value'),
+               ])
 def display_click_data(pie, bar, mix, heatmap, d_value, fig_type):
     try:
         df = get_df()
@@ -329,7 +332,7 @@ def display_click_data(pie, bar, mix, heatmap, d_value, fig_type):
                 if weekday == '日':
                     weekday = 7
                 year = d_value
-                data = df[(df['weekday'] == int(weekday)-1) & (df['week'] == int(week)) & (df['year'] == year)]
+                data = df[(df['weekday'] == int(weekday) - 1) & (df['week'] == int(week)) & (df['year'] == year)]
         return get_news_table(data)
     except:
         return None
@@ -340,13 +343,14 @@ def update_info(col):
     def get_data(json, n):
         df = pd.read_json(json)
         return df[col][0]
+
     return get_data
 
 
 for col in columns:
     app.callback(Output(col, "children"),
                  [Input('load_info', 'children'), Input("stream", "n_intervals")]
-     )(update_info(col))
+                 )(update_info(col))
 
 if __name__ == '__main__':
     # debug模式, 端口7777
