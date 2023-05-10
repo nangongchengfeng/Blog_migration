@@ -3,7 +3,10 @@
 # 按 Shift+F10 执行或将其替换为您的代码。
 # 按 双击 Shift 在所有地方搜索类、文件、工具窗口、操作和设置。
 import random
+
 #
+import requests
+
 list_image = []
 for i in range(1, 100):
     images = str(i).rjust(2, '0')
@@ -27,5 +30,14 @@ def random_get_url():
     x = random.choice(nums)  # 随机选择一个数字作为图片编号
     image_url = f"http://image.ownit.top/4kdongman/{x}.jpg"  # 拼接图片url
     return image_url
+
+
+# 调用random_get_url()函数，返回一个图片url，进行下载保存
+image_url = random_get_url()
+print(image_url)
+response = requests.get(image_url)
+with open('image.jpg', 'wb') as f:
+    f.write(response.content)
+
 
 print(random_get_url())

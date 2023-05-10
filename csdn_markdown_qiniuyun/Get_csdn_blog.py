@@ -215,5 +215,6 @@ def main():
 
 
 if __name__ == '__main__':
-    main()
+    # main()
+    request_blog_list('heian_99')
 
