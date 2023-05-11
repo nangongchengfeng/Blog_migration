@@ -19,6 +19,44 @@ headers = {
 }
 
 
+def append_blog_info(blog_column_url, blog_column_name, blogs):
+    # 发送get请求，获取响应
+    reply = requests.get(url=blog_column_url, headers=headers)
+    # 使用BeautifulSoup解析响应
+    blog_span = BeautifulSoup(reply.content, "lxml")
+    # 获取所有的class="column_article_list"的<ul>标签
+    blogs_list = blog_span.find_all('ul', attrs={'class': 'column_article_list'})
+    # 遍历所有的<ul>标签
+    for arch_blog_info in blogs_list:
+        # 获取<ul>标签内所有的<li>标签
+        blogs_list = arch_blog_info.find_all('li')
+        # 遍历所有的<li>标签
+        for blog_info in blogs_list:
+            # 获取<li>标签内的文章链接和标题
+            blog_url = blog_info.find('a', attrs={'target': '_blank'})['href']
+            blog_title = blog_info.find('h2', attrs={'class': "title"}).get_text().strip().replace(" ", "_").replace(
+                '/', '_')
+            statuses = blog_info.find_all("span", class_="status")
+            three_status = []
+            for index, status in enumerate(statuses):
+                if index == 0:
+                    time_str = status.text.split('·')[0]
+                    time_str = time_str.strip()
+                    three_status.append(time_str)
+                else:
+                    time_str = status.text.split('·')[0]
+                    num = int(re.findall(r'\d+', time_str)[0])
+                    three_status.append(num)
+
+            # 将文章信息存储在字典中
+            blog_dict = {'url': blog_url, 'title': blog_title, 'date': three_status[0], 'read_num': three_status[1],
+                         'comment_num': three_status[2], 'type': blog_column_name}
+            # 将字典追加到文章列表中
+            blogs.append(blog_dict)
+    # 返回所有文章的信息
+    return blogs
+
+
 def get_info():
     """获取大屏第一列信息数据"""
     headers = {
@@ -82,39 +120,70 @@ def get_blog():
         'User-Agent': 'Mozilla/5.0 (MSIE 10.0; Windows NT 6.1; Trident/5.0)',
         'referer': 'https: // passport.csdn.net / login',
     }
-    base_url = 'https://blog.csdn.net/heian_99/article/list/'
-    resp = requests.get(base_url + "1", headers=headers, timeout=3)
-
-    max_page = int(re.findall(r'var listTotal = (\d+);', resp.text)[0]) // 40 + 1
+    # 获取所有专栏博客信息的嵌套列表
+    # blog_columns = request_blog_column(id)
+    blog_columns = [['https://blog.csdn.net/heian_99/category_11822490.html', 'Jenkins', '11822490', '7'],
+                    ['https://blog.csdn.net/heian_99/category_11509281.html', 'Go语言', '11509281', '8'],
+                    ['https://blog.csdn.net/heian_99/category_11034339.html', 'Ansible', '11034339', '3'],
+                    ['https://blog.csdn.net/heian_99/category_9652886.html', 'Kubernetes', '9652886', '53'],
+                    ['https://blog.csdn.net/heian_99/category_10946715.html', 'Kubernetes项目实战', '10946715', '10'],
+                    ['https://blog.csdn.net/heian_99/category_10930558.html', 'Kubernetes应用', '10930558', '17'],
+                    ['https://blog.csdn.net/heian_99/category_10930341.html', 'Traefik', '10930341', '2'],
+                    ['https://blog.csdn.net/heian_99/category_9577365.html', 'Docker', '9577365', '29'],
+                    ['https://blog.csdn.net/heian_99/category_9662810.html', 'Prometheus监控', '9662810', '18'],
+                    ['https://blog.csdn.net/heian_99/category_8862710.html', 'MySQL', '8862710', '37'],
+                    ['https://blog.csdn.net/heian_99/category_9989746.html', 'Zabbix监控', '9989746', '9'],
+                    ['https://blog.csdn.net/heian_99/category_9545224.html', 'Nginx', '9545224', '7'],
+                    ['https://blog.csdn.net/heian_99/category_8942291.html', 'Python学习', '8942291', '25'],
+                    ['https://blog.csdn.net/heian_99/category_10705987.html', '项目实战', '10705987', '9'],
+                    ['https://blog.csdn.net/heian_99/category_8750410.html', 'Linux Shell', '8750410', '26'],
+                    ['https://blog.csdn.net/heian_99/category_9675115.html', '企业级-Shell脚本案例', '9675115', '30'],
+                    ['https://blog.csdn.net/heian_99/category_9288323.html', 'Linux系统入门', '9288323', '1'],
+                    ['https://blog.csdn.net/heian_99/category_10149025.html', 'Linux实战操作', '10149025', '20'],
+                    ['https://blog.csdn.net/heian_99/category_10148973.html', 'Linux服务应用', '10148973', '16'],
+                    ['https://blog.csdn.net/heian_99/category_10148926.html', 'Linux基础', '10148926', '23'],
+                    ['https://blog.csdn.net/heian_99/category_9356447.html', 'Java', '9356447', '17'],
+                    ['https://blog.csdn.net/heian_99/category_9520385.html', '错误问题解决', '9520385', '14'],
+                    ['https://blog.csdn.net/heian_99/category_8961205.html', '软件', '8961205', '5']]
 
     df = pd.DataFrame(columns=['url', 'title', 'date', 'read_num', 'comment_num', 'type'])
     count = 0
 
-    for i in range(1, max_page + 1):
-        url = base_url + str(i)
-        resp = requests.get(url, headers=headers)
-        soup = BeautifulSoup(resp.text, 'lxml')
-        articles = soup.find("div", class_='article-list').find_all('div',
-                                                                    class_='article-item-box csdn-tracking-statistics')
-
-        for article in articles[1:]:
-            a_url = article.find('h4').find('a')['href']
-            title = article.find('h4').find('a').get_text(strip=True)[2:]
-            issuing_time = article.find('span', class_="date").get_text(strip=True)
-            num_list = article.find_all('span', class_="read-num")
-            read_num = num_list[0].get_text(strip=True)
-
-            if len(num_list) > 1:
-                comment_num = num_list[1].get_text(strip=True)
-            else:
-                comment_num = 0
-            # print(a_url, title, issuing_time, read_num,comment_num,num_list)
-            # exit(1)
-            the_type = get_type(title)
-            df.loc[count] = [a_url, title, issuing_time, int(read_num), int(comment_num), the_type]
+    blogs = []
+    # 遍历专栏博客信息的嵌套列表
+    for blog_column in blog_columns:
+        blog_column_url = blog_column[0]
+        blog_column_name = blog_column[1]
+        blog_column_id = blog_column[2]
+        blog_column_num = int(blog_column[3])
+        # 如果专栏博客数量大于40，一页的篇数为40，需要翻页
+        if blog_column_num > 40:
+            # 计算翻页数量
+            page_num = round(blog_column_num / 40)
+            # 倒序循环翻页链接
+            for i in range(page_num, 0, -1):
+                # 拼接翻页链接
+                blog_column_url = blog_column[0]
+                url_str = blog_column_url.split('.html')[0]
+                blog_column_url = url_str + '_' + str(i) + '.html'
+                # 将文章信息追加到文章列表中
+                append_blog_info(blog_column_url, blog_column_name, blogs)
+            # 获取第一页的文章列表信息
+            blog_column_url = blog_column[0]
+            blogs = append_blog_info(blog_column_url, blog_column_name, blogs)
+        # 如果专栏博客数量小于等于40
+        else:
+            # 获取专栏第一页的文章列表信息
+            blogs = append_blog_info(blog_column_url, blog_column_name, blogs)
+    # 返回所有文章的信息
+    """
+                df.loc[count] = [a_url, title, issuing_time, int(read_num), int(comment_num), the_type]
             count += 1
-        time.sleep(random.choice([1, 1.1, 1.3]))
-    print(df)
+    """
+    for blog in blogs:
+        print(blog)
+        df.loc[count] = [blog['url'], blog['title'], blog['date'], blog['read_num'], blog['comment_num'], blog['type']]
+        count += 1
     return df
 
 
@@ -130,7 +199,9 @@ def get_categorize():
     spans = parse.find_all('a', attrs={'class': 'special-column-name'})
     #           [href, blog_column, blog_id, blogs_column_num, subscribe_num_span, article_num_span, read_num_span,
     #              collect_num_span]
-    df = pd.DataFrame(columns=['href', 'categorize', 'categorize_id', 'column_num', 'num_span', 'article_num','read_num', 'collect_num'])
+    df = pd.DataFrame(
+        columns=['href', 'categorize', 'categorize_id', 'column_num', 'num_span', 'article_num', 'read_num',
+                 'collect_num'])
     count = 0
 
     blog_columns = []
@@ -164,12 +235,14 @@ def get_categorize():
         blog_columns.append(
             [href, blog_column, blog_id, blogs_column_num, subscribe_num_span, article_num_span, read_num_span,
              collect_num_span])
-        df.loc[count] = [href, blog_column, int(blog_id), int(blogs_column_num), int(subscribe_num_span), int(article_num_span),int(read_num_span),
-             int(collect_num_span)]
+        df.loc[count] = [href, blog_column, int(blog_id), int(blogs_column_num), int(subscribe_num_span),
+                         int(article_num_span), int(read_num_span),
+                         int(collect_num_span)]
         count += 1
     time.sleep(random.choice([1, 1.1, 1.3]))
     print(df)
     return df
+
 
 def run():
     # 今天的时间
@@ -184,23 +257,10 @@ def run():
     # 获取大屏第二、三列信息数据, 并写入my_database数据库的日期表中, 如若表已存在, 删除覆盖
     df_article = get_blog()
     df_article.to_sql(today, con=engine, if_exists='replace', index=True)
-    #获取分类
+    # 获取分类
     df_categorize = get_categorize()
     df_categorize.to_sql("categorize", con=engine, if_exists='replace', index=True)
 
 
 if __name__ == '__main__':
-    # run()
-    # print(get_info())
-    # 今天的时间
-    today = dt.datetime.today().strftime("%Y-%m-%d")
-    # 连接mysql数据库
-    engine = create_engine('mysql+pymysql://root:123456@192.168.102.20/csdn?charset=utf8')
-
-    # # 获取大屏第一列信息数据, 并写入my_database数据库的info表中, 如若表已存在, 删除覆盖
-    # df_info = get_info()
-    # print("获取数据：", df_info)
-    # print("-----------------")
-    # df_info.to_sql("info", con=engine, if_exists='replace', index=False)
-    # 获取大屏第二、三列信息数据, 并写入my_database数据库的日期表中, 如若表已存在, 删除覆盖
-
+    run()

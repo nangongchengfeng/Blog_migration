@@ -26,7 +26,7 @@ engine = create_engine('mysql+pymysql://root:123456@192.168.102.20/csdn?charset=
 external_css = [
     "https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css",
     "https://cdnjs.cloudflare.com/ajax/libs/skeleton/2.0.4/skeleton.min.css",
-    "http://raw.githack.com/ffzs/DA_dash_hr/master/css/my.css"
+    "../static/css/my.css",
 ]
 
 # 创建一个实例
@@ -96,14 +96,24 @@ def get_df():
 
 
 # 导航栏的图片及标题
-head = html.Div([
-    html.Div(html.Img(
-        src='https://www.ownit.top/img/avatar_hu227367ba8544f2fc7811ed9508937bec_102665_300x0_resize_box_3.png',
-        height="100%"),
-        style={"float": "left", "height": "90%", "margin-top": "5px", "border-radius": "50%",
-               "overflow": "hidden"}),
-    html.Span("{}博客的Dashboard".format(info['author_name'][0]), className='app-title'),
-], className="row header")
+head = html.Div(
+    [
+        html.Div(
+            html.A(
+                html.Img(
+                    src='https://www.ownit.top/img/avatar_hu227367ba8544f2fc7811ed9508937bec_102665_300x0_resize_box_3.png',
+                    style={"width": "100%", "height": "100%", "object-fit": "contain", "border-radius": "50%"}),
+                href="https://blog.csdn.net/heian_99"
+            ),
+            style={"float": "left", "height": "90%", "margin-top": "5px", "margin-right": "10px"}
+        ),
+        html.A(html.Span("{}博客的Dashboard".format(info['author_name'][0]), className='app-title'),
+               href="https://blog.csdn.net/heian_99",
+               style={'display': 'flex', 'justify-content': 'center', 'align-items': 'center'}),
+
+    ],
+    className="row header"
+)
 
 # 第一列的文字及数字信息
 columns = info.columns[3:]
@@ -204,9 +214,6 @@ def get_bar(n):
     date_month_list = df_date_month.index.tolist()  # 将date_month列转换为列表
     count_list = df_date_month['count'].tolist()  # 将count列转换为列表
 
-    print(date_month_list, count_list)
-    x = ['Product A', 'Product B', 'Product C']
-    y = [20, 14, 23]
     trace = go.Bar(
         x=date_month_list,
         y=count_list,
@@ -268,6 +275,7 @@ def get_heatmap(value, n):
 @app.callback(Output('mix', 'figure'), [Input("river", "n_intervals")])
 def get_mix(n):
     df = get_catego()
+    print("测试mix", df)
     df_type_visit_sum = pd.DataFrame(df['read_num'].groupby(df['categorize']).sum())
     # df_type_visit_sum = pd.DataFrame(df[['read_num','categorize']])
     df_type_visit_sum = df_type_visit_sum.sort_values(by='read_num', ascending=False).nlargest(15, 'read_num')
@@ -331,6 +339,7 @@ def display_click_data(pie, bar, mix, heatmap, d_value, fig_type):
             data = df[df['type'] == type_value]
         else:
             z = heatmap['points'][0]['z']
+            print(z)
             if z == 0:
                 return None
             else:
@@ -361,6 +370,7 @@ for col in columns:
 
 if __name__ == '__main__':
     # debug模式, 端口7777
-    app.run_server(debug=True, threaded=True, port=7777)
+    # app.run_server(debug=True, threaded=True, port=7777)
     # 正常模式, 网页右下角的调试按钮将不会出现
-    # app.run_server(port=7777)
+    print("start server")
+    app.run(host="0.0.0.0", port=7777)

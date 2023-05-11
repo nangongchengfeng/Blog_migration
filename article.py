@@ -54,11 +54,12 @@ def request_blog_column(id):
         # 从链接中提取博客id
         blog_id = href.split("_")[-1]
         blog_id = blog_id.split(".")[0]
-        blog_columns.append([href, blog_column, blog_id, blogs_column_num,subscribe_num_span,article_num_span,read_num_span,collect_num_span])
+        blog_columns.append(
+            [href, blog_column, blog_id, blogs_column_num, subscribe_num_span, article_num_span, read_num_span,
+             collect_num_span])
     print(blog_columns)
     # 返回包含链接、专栏名、博客id、专栏博客数量的嵌套列表
     return blog_columns
-
 
 
 # 往文章列表中追加文章信息
@@ -69,6 +70,7 @@ def request_blog_column(id):
 """
 import requests
 from bs4 import BeautifulSoup
+
 # 设置请求头
 headers = {
     'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/100.0.4896.75 Safari/537.36'
@@ -80,12 +82,39 @@ def append_blog_info(blog_column_url, blog_column_name, blogs):
     reply = requests.get(url=blog_column_url, headers=headers)
     # 使用BeautifulSoup解析响应
     blog_span = BeautifulSoup(reply.content, "lxml")
-    # print(blog_span)
     # 获取所有的class="column_article_list"的<ul>标签
     blogs_list = blog_span.find_all('ul', attrs={'class': 'column_article_list'})
-    print(blog_column_url, blog_column_name, blogs)
-    return blogs
+    # 遍历所有的<ul>标签
+    for arch_blog_info in blogs_list:
+        # 获取<ul>标签内所有的<li>标签
+        blogs_list = arch_blog_info.find_all('li')
+        # 遍历所有的<li>标签
+        for blog_info in blogs_list:
+            # 获取<li>标签内的文章链接和标题
+            blog_url = blog_info.find('a', attrs={'target': '_blank'})['href']
+            blog_title = blog_info.find('h2', attrs={'class': "title"}).get_text().strip().replace(" ", "_").replace(
+                '/', '_')
+            statuses = blog_info.find_all("span", class_="status")
+            three_status = []
 
+            for index, status in enumerate(statuses):
+                if index == 0:
+                    time_str = status.text.split('·')[0]
+                    time_str = time_str.strip()
+                    three_status.append(time_str)
+                else:
+                    time_str = status.text.split('·')[0]
+                    num = int(re.findall(r'\d+', time_str)[0])
+                    three_status.append(num)
+
+
+            # 将文章信息存储在字典中
+            blog_dict = {'url': blog_url, 'title': blog_title, 'date': three_status[0], 'read_num': three_status[1],
+                         'comment_num': three_status[1], 'type': blog_column_name}
+            # 将字典追加到文章列表中
+            blogs.append(blog_dict)
+    # 返回所有文章的信息
+    return blogs
 
 
 # 获取 博客 所有博客的信息（分栏，url 标题）
@@ -124,7 +153,6 @@ def request_blog_list(id):
     return blogs
 
 
-
 if __name__ == '__main__':
     # main()
-    request_blog_column('heian_99')
+    request_blog_list('heian_99')
