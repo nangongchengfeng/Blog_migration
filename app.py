@@ -13,8 +13,7 @@ import plotly.graph_objs as go
 from dash.dependencies import Input, Output
 import datetime as dt
 from sqlalchemy import create_engine
-from flask_caching import Cache
-import numpy as np
+
 
 # 今天的时间
 today = dt.datetime.today().strftime("%Y-%m-%d")
@@ -24,8 +23,8 @@ engine = create_engine('mysql+pymysql://root:123456@192.168.102.20/csdn?charset=
 
 # 导入css样式
 external_css = [
-    "https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css",
-    "https://cdnjs.cloudflare.com/ajax/libs/skeleton/2.0.4/skeleton.min.css",
+    "../static/css/bootstrap.min.css",
+    "../static/css/skeleton.min.css",
     "../static/css/my.css",
 ]
 
@@ -34,10 +33,10 @@ app = dash.Dash(__name__, external_stylesheets=external_css)
 server = app.server
 
 # 可以选择使用缓存, 减少频繁的数据请求
-cache = Cache(app.server, config={
-    'CACHE_TYPE': 'filesystem',
-    'CACHE_DIR': 'cache-directory'
-})
+# cache = Cache(app.server, config={
+#     'CACHE_TYPE': 'filesystem',
+#     'CACHE_DIR': 'cache-directory'
+# })
 
 # 读取info表的数据
 info = pd.read_sql('info', con=engine)
@@ -70,7 +69,7 @@ def get_news_table(data):
     ])], style={"height": "90%", "width": "98%"})
 
 
-@cache.memoize(timeout=3590)
+# @cache.memoize(timeout=3590)
 def get_catego():
     """获取当日最新的文章数据"""
     df = pd.read_sql("categorize", con=engine)
@@ -275,7 +274,7 @@ def get_heatmap(value, n):
 @app.callback(Output('mix', 'figure'), [Input("river", "n_intervals")])
 def get_mix(n):
     df = get_catego()
-    print("测试mix", df)
+    # print("测试mix", df)
     df_type_visit_sum = pd.DataFrame(df['read_num'].groupby(df['categorize']).sum())
     # df_type_visit_sum = pd.DataFrame(df[['read_num','categorize']])
     df_type_visit_sum = df_type_visit_sum.sort_values(by='read_num', ascending=False).nlargest(15, 'read_num')
@@ -350,7 +349,8 @@ def display_click_data(pie, bar, mix, heatmap, d_value, fig_type):
                 year = d_value
                 data = df[(df['weekday'] == int(weekday) - 1) & (df['week'] == int(week)) & (df['year'] == year)]
         return get_news_table(data)
-    except:
+    except Exception as e:
+        print("error:", e)
         return None
 
 
@@ -373,4 +373,4 @@ if __name__ == '__main__':
     # app.run_server(debug=True, threaded=True, port=7777)
     # 正常模式, 网页右下角的调试按钮将不会出现
     print("start server")
-    app.run(host="0.0.0.0", port=7777)
+    app.run(host="0.0.0.0", port=7000)

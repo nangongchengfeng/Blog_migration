@@ -8,12 +8,10 @@
 
 import json
 import os
-import uuid
-import time
-import requests
-import datetime
-import argparse
 import re
+import uuid
+
+import requests
 from bs4 import BeautifulSoup
 
 from apollo_config import cookie
@@ -100,10 +98,44 @@ def append_blog_info(blog_column_url, blog_column_name, blogs):
     return blogs
 
 
+def get_time(response):
+    # 确保请求成功
+    if response.status_code == 200:
+        # 解析网页内容
+        soup = BeautifulSoup(response.text, 'html.parser')
+
+        # 查找<div class="bar-content">
+        bar_content = soup.find('div', class_='bar-content')
+
+        # 确保找到了<div class="bar-content">
+        if bar_content:
+            # 查找<div class="bar-content">下面的<span class="time">
+            time_span = bar_content.find('span', class_='time')
+
+            # 确保找到了<span class="time">
+            if time_span:
+                # 获取<span class="time">的值
+                time_value = time_span.text
+
+                # 使用正则表达式提取时间部分
+                match = re.search(r'\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}', time_value)
+                if match:
+                    filtered_time = match.group(0)
+                    return filtered_time
+                else:
+                    print('未找到符合的时间格式')
+            else:
+                print('未找到<span class="time">')
+        else:
+            print('未找到<div class="bar-content">')
+    else:
+        print(f'请求失败，状态码: {response.status_code}')
+
+
 def request_md(id):
     # blogs = request_blog_list(id)
-    blogs = [{'column': 'Nginx', 'url': 'https://blog.csdn.net/heian_99/article/details/130058875',
-              'title': 'Nginx模板自动化'}]
+    blogs = [{'column': 'Python学习', 'url': 'https://blog.csdn.net/heian_99/article/details/140774948',
+              'title': 'PowerDNS架构解析与安装部署指南'}]
     print(blogs)
     for blog_dict in blogs:
         blog_url = blog_dict['url']
@@ -115,17 +147,39 @@ def request_md(id):
             'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.36',
             'Cookie': cookie,
         }
-
+        print(url)
         data = {"id": blog_id}
         reply = requests.get(url, headers=headers, data=data)
         reply_data = reply.json()
-        print(reply_data)
+        txt = requests.get(blog_url, headers=headers)
+        time = get_time(txt)
+        if time is not None:
+            date = time
+        else:
+            print("获取时间失败，请检查代码")
+            exit(0)
         try:
+            # 从 JSON 数据中提取所需的信息
+            data = reply_data['data']
+            title = data['title']
+            tags = data['tags']
+            categories = data['categories']
+            description = data['description']
+            # 生成 Markdown 头部
+            markdown_header = f"""---
+title: {title}
+date: {date}
+tags: {tags}
+categories: {categories}
+description: "{description}"
+---
+<!--more-->\n"""
+
             key = "key" + str(uuid.uuid4())
             content = reply_data["data"]["markdowncontent"].replace("@[toc]", "")
             blog_title_dir = './' + str(id) + '/' + str(blog_column) + '/' + str(blog_title) + '.md'
             with open(blog_title_dir, "w", encoding="utf-8") as f:
-                f.write(content)
+                f.write(markdown_header + content)
 
             print("download blog markdown blog:" + '【' + blog_column + '】' + str(blog_title))
         except Exception as e:
