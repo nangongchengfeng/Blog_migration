@@ -7,8 +7,8 @@
 from qiniu import Auth, put_file
 
 # 获取Access Key 和 Secret Key 后，进行初始化对接：
-q = Auth(access_key='jWaf41PJ7JKXdKmnB6TM3CSuorg4XT_Gas6CDGAm',
-         secret_key='ScBEdgrmLBrcak2oPuVnHoqwvW4tIJpV2LvucP8y')
+q = Auth(access_key='xxxxx',
+         secret_key='xxxxx')
 # 上传的七牛云空间
 bucket_name = 'heian99'
 
