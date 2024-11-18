@@ -1,9 +1,15 @@
 ---
-title: PowerDNS架构解析与安装部署指南
+author: 南宫乘风
+categories:
+- 项目实战
 date: 2024-07-29 17:11:26
-tags: 架构
-categories: 项目实战
-description: "目前公司使用PowerDNS进行DNS管理，但由于采用的是单节点架构，存在不可用的风险。为提升系统的稳定性和可靠性，我们计划对现有架构进行重构。通过引入高可用性设计，我们将优化系统架构，使其能够在故障情况下依然保持服务的连续性和高效性，从而提升整体的业务稳定性。系统：Cnetos7软件：（相关信息已经脱敏）名称ip组件matsernginx，mysql，PowerDNS Authoritative ，PowerDNS Recursor   （主）slave。"
+description: 目前公司使用PowerDNS进行DNS管理，但由于采用的是单节点架构，存在不可用的风险。为提升系统的稳定性和可靠性，我们计划对现有架构进行重构。通过引入高可用性设计，我们将优化系统架构，使其能够在故障情况下依然保持服务的连续性和高效性，从而提升整体的业务稳定性。系统：Cnetos7软件：（相关信息已经脱敏）名称ip组件matsernginx，mysql，PowerDNS
+  Authoritative ，PowerDNS Recursor   （主）slave。
+image: ../../title_pic/52.jpg
+slug: '202407291711'
+tags:
+- 架构
+title: PowerDNS架构解析与安装部署指南
 ---
 <!--more-->
 ## 1、背景介绍
@@ -31,7 +37,7 @@ PowerDNS Recursor（5301）： 用于DNS解析转发、缓存
 
 
 
-![在这里插入图片描述](https://i-blog.csdnimg.cn/direct/7ac48b5ce4034594a614e1fa76266ac6.png)
+![在这里插入图片描述](../../image/7ac48b5ce4034594a614e1fa76266ac6.png)
 ## 3、组件介绍
  PowerDNS全家桶中包含PowerDNS Authoritative、Recursor、DNSList（暂不使用）三个组件。 
 
@@ -52,7 +58,7 @@ PowerDNS（PDNS）成立于20世纪90年代末，是开源DNS软件、服务和�
 熟悉DNS工作原理的同学可以大致地将DNS记录的查询分为两种：**查询本地缓存**和**向上递归查询**。和其他的如BIND、dnsmasq等将这些功能集成到一起的DNS软件不同，PowerDNS将其一分为二，分为了`PowerDNS Authoritative Server`和`PowerDNS Recursor`，分别对应这两种主要的需求，而我们常说的`pdns`指的就是`PowerDNS Authoritative Server (后面简称PDNS Auth)`，主要用途就是作为**权威域名服务器**，当然也可以作为普通的DNS服务器提供DNS查询功能。 
 
 对于PowerDNS-Recursor，PowerDNS官网介绍其是一个**内置脚本能力**的高性能的**DNS递归查询**服务器，并且已经为一亿五千万个互联网连接提供支持。
-![在这里插入图片描述](https://i-blog.csdnimg.cn/direct/a37b97ccff3e4f32995266159db67265.jpeg)
+![在这里插入图片描述](../../image/a37b97ccff3e4f32995266159db67265.jpeg)
 ## 4、MySQL安装
 可参照博客安装 ：  https://blog.csdn.net/heian_99/article/details/106644755
 ### MySQL主从同步
@@ -63,7 +69,7 @@ grant replication slave  on *.* to repl@'172.17.20.%' identified by '123';
 flush privileges;
 show master status; #查询master的状态 ，进行同步
 ```
-![在这里插入图片描述](https://i-blog.csdnimg.cn/direct/247cf37487994935b17a9621e53e621c.png)
+![在这里插入图片描述](../../image/247cf37487994935b17a9621e53e621c.png)
 #### slave库同步
 
 注意：主从库的server_id 不能设置一样，auto.cnf 设置也不能一样，不满会出现mysql主从同步失败的
@@ -84,7 +90,7 @@ mysql> start slave;
 
 mysql> show slave status\G
 ```
-![在这里插入图片描述](https://i-blog.csdnimg.cn/direct/7b0271af28654650a2350f4b872a9390.png)
+![在这里插入图片描述](../../image/7b0271af28654650a2350f4b872a9390.png)
 #### 创建**powerdns**数据库
 需要在主从配置完成后创建
 
@@ -96,7 +102,7 @@ CREATE DATABASE powerdns;
 GRANT ALL ON powerdns.* TO 'powerdns'@'localhost' IDENTIFIED BY 'VMware1!';
 FLUSH PRIVILEGES;
 ```
-![在这里插入图片描述](https://i-blog.csdnimg.cn/direct/05d49e35b8ad43379338ac995ecbeb85.png)
+![在这里插入图片描述](../../image/05d49e35b8ad43379338ac995ecbeb85.png)
 导入PowerDNS 的数据库
 
 ```sql
@@ -201,7 +207,7 @@ Database changed
 mysql> source /opt/schema.mysql.sql
 Query OK, 0 rows affected (0.01 sec)
 ```
-![在这里插入图片描述](https://i-blog.csdnimg.cn/direct/67cd31b12c634c51a38566efcecf0cbc.png)
+![在这里插入图片描述](../../image/67cd31b12c634c51a38566efcecf0cbc.png)
 ## 5、PowerDNS Authoritative Server安装
 
 - 参考官网文档：[https://doc.powerdns.com/authorit文章来源(Source)：https://www.dqzboy.comative/installation.html](https://www.dqzboy.com/go.php?url=https://doc.powerdns.com/authoritative/installation.html)
@@ -216,7 +222,7 @@ Query OK, 0 rows affected (0.01 sec)
 [root@localhost ~]# yum makecache
 [root@localhost ~]# yum install -y pdns pdns-backend-mysql
 ```
-![在这里插入图片描述](https://i-blog.csdnimg.cn/direct/575ecca4163945cbaf4c69a7c18dcfd5.png)
+![在这里插入图片描述](../../image/575ecca4163945cbaf4c69a7c18dcfd5.png)
 
 ### 修改配置文件
 `/etc/pdns/pdns.conf `
@@ -286,7 +292,7 @@ Created symlink from /etc/systemd/system/multi-user.target.wants/pdns.service to
 [root@master pdns]# systemctl start pdns.service
 [root@master pdns]# systemctl status pdns.service
 ```
-![在这里插入图片描述](https://i-blog.csdnimg.cn/direct/a2b861cc1ef843ca9631728c1e6ed3fe.png)
+![在这里插入图片描述](../../image/a2b861cc1ef843ca9631728c1e6ed3fe.png)
 ## 6、PowerDNS Recursor安装
 
 ```bash
@@ -395,7 +401,7 @@ forward-zones=.=8.8.8.8;8.8.4.4
 ```bash
 touch {forward,hosts}
 ```
-![在这里插入图片描述](https://i-blog.csdnimg.cn/direct/51758a743ea4400ba452377dec6453b9.png)
+![在这里插入图片描述](../../image/51758a743ea4400ba452377dec6453b9.png)
 借鉴配置
 
 ```bash
@@ -428,7 +434,7 @@ Created symlink from /etc/systemd/system/multi-user.target.wants/pdns-recursor.s
 [root@master pdns-recursor]# systemctl start  pdns-recursor
 [root@master pdns-recursor]# systemctl status pdns-recursor.service 
 ```
-![在这里插入图片描述](https://i-blog.csdnimg.cn/direct/caa8830216094784befb1bc79c596cb3.png)
+![在这里插入图片描述](../../image/caa8830216094784befb1bc79c596cb3.png)
 
 ## 7、PowerAdmin安装
 
@@ -443,21 +449,21 @@ https://linux.cn/article-5623-2.html        #跟随此连接安装即可
 打开浏览器 ，打开页面
 http://172.17.20.20:90/install/
 ```
-![在这里插入图片描述](https://i-blog.csdnimg.cn/direct/c4cbecd71c0844a1882c08479cfbf2e0.png)
-![在这里插入图片描述](https://i-blog.csdnimg.cn/direct/67eb9fcef6bc464686cc0a02771ed51e.png)
-![在这里插入图片描述](https://i-blog.csdnimg.cn/direct/ad3d702cfe00420bbc44a63e1227db8c.png)
-![在这里插入图片描述](https://i-blog.csdnimg.cn/direct/a23a3a4ad55743128d3c2cc2b77121ea.png)
-![在这里插入图片描述](https://i-blog.csdnimg.cn/direct/39500702c36b4774a2e431f8c47627df.png)
-![在这里插入图片描述](https://i-blog.csdnimg.cn/direct/5269f94d449e4fd98572277bec1e7007.png)
-![在这里插入图片描述](https://i-blog.csdnimg.cn/direct/b4f2a90f989c4ee1afdef0273169e777.png)
-![在这里插入图片描述](https://i-blog.csdnimg.cn/direct/a5a2266891f34cabac099bfc55dcbfe7.png)
-![在这里插入图片描述](https://i-blog.csdnimg.cn/direct/13b5bd7349b74b98b707470826c6d81f.png)
+![在这里插入图片描述](../../image/c4cbecd71c0844a1882c08479cfbf2e0.png)
+![在这里插入图片描述](../../image/67eb9fcef6bc464686cc0a02771ed51e.png)
+![在这里插入图片描述](../../image/ad3d702cfe00420bbc44a63e1227db8c.png)
+![在这里插入图片描述](../../image/a23a3a4ad55743128d3c2cc2b77121ea.png)
+![在这里插入图片描述](../../image/39500702c36b4774a2e431f8c47627df.png)
+![在这里插入图片描述](../../image/5269f94d449e4fd98572277bec1e7007.png)
+![在这里插入图片描述](../../image/b4f2a90f989c4ee1afdef0273169e777.png)
+![在这里插入图片描述](../../image/a5a2266891f34cabac099bfc55dcbfe7.png)
+![在这里插入图片描述](../../image/13b5bd7349b74b98b707470826c6d81f.png)
 **需要移除从PowerAdmin的根目录中移除“install”文件夹，这一点很重要。使用以下命令：**
-![在这里插入图片描述](https://i-blog.csdnimg.cn/direct/ef56178ab9d6448aa7e5b93b15cec064.png)
-![在这里插入图片描述](https://i-blog.csdnimg.cn/direct/70cbd806172f4a5f83deb9a663741b74.png)
-### 添加主域名![在这里插入图片描述](https://i-blog.csdnimg.cn/direct/105b3d51c441434cb0d5fe60d46548e7.png)
+![在这里插入图片描述](../../image/ef56178ab9d6448aa7e5b93b15cec064.png)
+![在这里插入图片描述](../../image/70cbd806172f4a5f83deb9a663741b74.png)
+### 添加主域名![在这里插入图片描述](../../image/105b3d51c441434cb0d5fe60d46548e7.png)
 ###  添加子域名
-![在这里插入图片描述](https://i-blog.csdnimg.cn/direct/1ec2f3e6f3d04448b3ecfb6170cf305d.png)
+![在这里插入图片描述](../../image/1ec2f3e6f3d04448b3ecfb6170cf305d.png)
 ## 8、成功测试
 
 ```bash
@@ -536,7 +542,7 @@ stream {
 
 
 ```
-![在这里插入图片描述](https://i-blog.csdnimg.cn/direct/077a6d2f9ce34468944e06e5a7204671.png)
+![在这里插入图片描述](../../image/077a6d2f9ce34468944e06e5a7204671.png)
 
 ```bash
 [root@master ~]# netstat -ltunp |grep 53

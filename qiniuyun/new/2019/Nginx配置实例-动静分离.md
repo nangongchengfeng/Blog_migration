@@ -1,0 +1,57 @@
+---
+author: 南宫乘风
+categories:
+- Nginx
+date: 2019-12-04 17:57:02
+description: 、什么是动静分离通过指定不同的后缀名实现不同的请求转发。通过参数设置，可以使浏览器缓存过期时间，减少与服务器之前的请求和流量。具体定义：是给一个资源设定一个过期时间，也就是说无需去服务端验证，直接通过。。。。。。。
+image: http://image.ownit.top/4kdongman/53.jpg
+tags:
+- 技术记录
+title: Nginx 配置实例-动静分离
+---
+
+<!--more-->
+
+### **1、什么是动静分离 **
+
+![](http://image.ownit.top/csdn/20191204175415158.png)
+
+**通过 location 指定不同的后缀名实现不同的请求转发。通过 expires 参数设置，可以使浏 览器缓存过期时间，减少与服务器之前的请求和流量。具体 Expires 定义：是给一个资源 设定一个过期时间，也就是说无需去服务端验证，直接通过浏览器自身确认是否过期即可， 所以不会产生额外的流量。此种方法非常适合不经常变动的资源。（如果经常更新的文件， 不建议使用 Expires 来缓存），我这里设置 3d，表示在这 3 天之内访问这个 URL，发送一 个请求，比对服务器该文件最后更新时间没有变化，则不会从服务器抓取，返回状态码 304， 如果有修改，则直接从服务器重新下载，返回状态码 200。 **
+
+### **2、准备工作 **
+
+**（1）在 liunx 系统中准备静态资源，用于进行访问 **
+
+![](http://image.ownit.top/csdn/20191204175449565.png)
+
+### **3、具体配置 **
+
+**（1）在 nginx 配置文件中进行配置 **
+
+![](http://image.ownit.top/csdn/20191204175522806.png)
+
+ 
+
+### 4、最终测试 
+
+**（1）浏览器中输入地址 http://192.168.17.129/image/01.jpg **
+
+![](http://image.ownit.top/csdn/20191204175548402.png)
+
+![](http://image.ownit.top/csdn/20191204175631237.png)
+
+**（2）在浏览器地址栏输入地址 http://192.168.17.129/www/a.html   
+ **![](http://image.ownit.top/csdn/20191204175646863.png)  
+ 
+
+## 相关博文：
+
+### [Nginx 简介与安装、常用的命令和配置文件](https://blog.csdn.net/heian_99/article/details/103264404)
+
+## [nginx 配置实例-反向代理](https://blog.csdn.net/heian_99/article/details/103292763)
+
+### [nginx 配置实例-负载均衡](https://blog.csdn.net/heian_99/article/details/103298249)
+
+### [Nginx 配置实例-动静分离](https://blog.csdn.net/heian_99/article/details/103391378)
+
+### [Nginx 配置高可用的集群](https://blog.csdn.net/heian_99/article/details/103391454)

@@ -134,8 +134,8 @@ def get_time(response):
 
 def request_md(id):
     # blogs = request_blog_list(id)
-    blogs = [{'column': 'Python学习', 'url': 'https://blog.csdn.net/heian_99/article/details/140774948',
-              'title': 'PowerDNS架构解析与安装部署指南'}]
+    blogs = [{'column': 'Python学习', 'url': 'https://blog.csdn.net/heian_99/article/details/143234068',
+              'title': '机房私有云OpenStack搭建详细步骤流程'}]
     print(blogs)
     for blog_dict in blogs:
         blog_url = blog_dict['url']
